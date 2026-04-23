@@ -25,5 +25,9 @@ export const applyToJob = (jobId, formData) => API.post(`/applications/${jobId}`
 });
 export const fetchMyApplications = () => API.get('/applications/my');
 export const fetchJobApplications = (jobId) => API.get(`/applications/${jobId}`);
+export const fetchReviews = () => API.get('/reviews');
+export const createReview = (reviewData) => API.post('/reviews', reviewData);
+export const trackEvent = (eventData) => API.post('/analytics/track', eventData);
+export const fetchStats = () => API.get('/analytics/stats');
 
 export default API;

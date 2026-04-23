@@ -137,3 +137,14 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Python
+__pycache__/
+*.pyc
+.venv
+venv/
+env/
+.pytest_cache/
+
+# Backend uploads
+backend/uploads/

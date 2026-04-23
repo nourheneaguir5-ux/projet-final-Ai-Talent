@@ -58,7 +58,7 @@ const Register = () => {
             <button
               type="button"
               onClick={() => setFormData({...formData, role: 'CANDIDATE'})}
-              className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all ${
+              className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all relative ${
                 formData.role === 'CANDIDATE' 
                 ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400' 
                 : 'border-white/10 text-slate-400 hover:bg-white/5'
@@ -71,7 +71,7 @@ const Register = () => {
             <button
               type="button"
               onClick={() => setFormData({...formData, role: 'RECRUITER'})}
-              className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all ${
+              className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all relative ${
                 formData.role === 'RECRUITER' 
                 ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400' 
                 : 'border-white/10 text-slate-400 hover:bg-white/5'

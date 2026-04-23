@@ -1,0 +1,10 @@
+flask
+flask-cors
+scikit-learn
+numpy
+pandas
+PyPDF2
+pdfplumber
+python-dotenv
+python-docx
+textblob
