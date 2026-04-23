@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [showAddJob, setShowAddJob] = useState(false);
   const [formData, setFormData] = useState({ title: '', description: '', company: '', location: '', type: 'Full-time' });
   const [selectedJobApps, setSelectedJobApps] = useState(null);
+  const [dashboardStats, setDashboardStats] = useState({ totalApplicants: 0, topMatchRate: 0 });
   const { user } = useAuth();
 
   useEffect(() => {
@@ -18,12 +19,32 @@ const Dashboard = () => {
 
   const loadMyJobs = async () => {
     try {
+      setLoading(true);
       const { data } = await fetchJobs();
-      setJobs(data.data.filter(j => j.recruiter?._id === user?.id || j.company === user?.name));
+      const myJobs = data.data.filter(j => j.recruiter?._id === user?.id || j.company === user?.name);
+      
+      let totalApps = 0;
+      let topMatch = 0;
+      
+      const jobsWithStats = await Promise.all(myJobs.map(async (job) => {
+         try {
+             const res = await fetchJobApplications(job._id);
+             const apps = res.data.data;
+             totalApps += apps.length;
+             const jobTopMatch = apps.length > 0 ? Math.max(...apps.map(a => a.aiScore || 0)) : 0;
+             if (jobTopMatch > topMatch) topMatch = jobTopMatch;
+             return { ...job, applicantCount: apps.length };
+         } catch(e) {
+             return { ...job, applicantCount: 0 };
+         }
+      }));
+
+      setJobs(jobsWithStats);
+      setDashboardStats({ totalApplicants: totalApps, topMatchRate: Math.round(topMatch * 100) });
     } catch (err) {
       console.error(err);
     } finally {
-      setTimeout(() => setLoading(false), 800);
+      setTimeout(() => setLoading(false), 500);
     }
   };
 
@@ -75,7 +96,7 @@ const Dashboard = () => {
           <div className="p-4 bg-pink-500/10 text-pink-400 rounded-2xl"><Users size={24} /></div>
           <div>
             <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Total Applicants</p>
-            <p className="text-4xl font-black">48</p>
+            <p className="text-4xl font-black">{dashboardStats.totalApplicants}</p>
           </div>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
@@ -83,7 +104,7 @@ const Dashboard = () => {
           <div className="p-4 bg-emerald-500/10 text-emerald-400 rounded-2xl"><TrendingUp size={24} /></div>
           <div>
             <p className="text-sm text-slate-500 font-bold uppercase tracking-widest">Top Match Rate</p>
-            <p className="text-4xl font-black">92%</p>
+            <p className="text-4xl font-black">{dashboardStats.topMatchRate}%</p>
           </div>
         </motion.div>
       </div>
@@ -113,7 +134,7 @@ const Dashboard = () => {
                 </div>
                 <div className="text-right">
                   <div className="bg-indigo-500/20 text-indigo-300 px-4 py-1.5 rounded-xl text-[10px] font-black mb-1 inline-block border border-indigo-500/30 group-hover:bg-indigo-500 group-hover:text-white transition-all">
-                    12 APPLICATIONS
+                    {job.applicantCount || 0} APPLICATIONS
                   </div>
                   <p className="text-[10px] text-slate-600 uppercase tracking-widest font-bold">Priority Listing</p>
                 </div>

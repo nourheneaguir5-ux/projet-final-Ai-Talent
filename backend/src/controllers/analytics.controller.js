@@ -40,6 +40,13 @@ exports.getStats = async (req, res) => {
       { $group: { _id: '$type', count: { $sum: 1 } } }
     ]);
 
+    const pageViews = await Event.aggregate([
+      { $match: { type: 'PAGE_VIEW' } },
+      { $group: { _id: '$page', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 7 }
+    ]);
+
     res.status(200).json({
       success: true,
       data: {
@@ -49,6 +56,7 @@ exports.getStats = async (req, res) => {
           applications: totalApplications
         },
         eventDistribution: eventCounts,
+        pageViews,
         recentEvents
       }
     });

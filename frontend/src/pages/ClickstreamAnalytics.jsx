@@ -38,10 +38,8 @@ const ClickstreamAnalytics = () => {
     { label: 'Jobs Posted', value: statsData?.counts.jobs || 0, icon: <ArrowUpRight size={24} />, change: '+-' },
   ];
 
-  // Simple placeholder for chart till more data
-  const chartData = [20, 30, 45, 35, 60, 55, 70, 80, 85, 90, 80, 70];
-  const chartLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
+  const maxCount = Math.max(...(statsData?.pageViews?.map(p => p.count) || [1]));
+  
   return (
     <div className="container animate-fade">
       <header className="mb-10">
@@ -60,47 +58,62 @@ const ClickstreamAnalytics = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
             key={i}
-            className="glass-card p-6"
+            className="glass-card p-6 border-t-2 border-indigo-500/30"
           >
             <div className="flex justify-between items-start mb-4">
               <div className="p-3 bg-indigo-500/10 text-indigo-400 rounded-xl">{stat.icon}</div>
-              <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-full">{stat.change}</span>
             </div>
-            <p className="text-3xl font-black mb-1">{stat.value}</p>
-            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">{stat.label}</p>
+            <p className="text-3xl font-black mb-1 text-white">{stat.value}</p>
+            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{stat.label}</p>
           </motion.div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Chart */}
+        {/* Dynamic Chart */}
         <div className="lg:col-span-8">
           <div className="glass-card">
             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-              <BarChart3 className="text-indigo-400" /> Monthly Traffic Overview
+              <BarChart3 className="text-indigo-400" /> Page Traffic Distribution
             </h2>
-            <div className="flex items-end justify-between gap-2 h-[200px] pt-4">
-              {chartData.map((val, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                  <motion.div
-                    initial={{ height: 0 }}
-                    animate={{ height: `${val}%` }}
-                    transition={{ duration: 0.8, delay: i * 0.05 }}
-                    className="w-full bg-gradient-to-t from-indigo-500 to-indigo-400/50 rounded-t-lg min-h-[4px] hover:from-pink-500 hover:to-pink-400/50 transition-colors cursor-pointer"
-                  />
-                  <span className="text-[10px] text-slate-500 font-bold">{chartLabels[i]}</span>
+            <div className="flex items-end justify-between gap-4 h-[250px] pt-4">
+              {statsData?.pageViews?.length > 0 ? (
+                statsData.pageViews.map((pageData, i) => {
+                  const heightPercent = Math.max((pageData.count / maxCount) * 100, 5); // Fallback to 5% min height
+                  return (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-3 group relative">
+                      {/* Tooltip */}
+                      <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white/10 text-white text-xs px-2 py-1 rounded-md font-bold whitespace-nowrap shadow-xl backdrop-blur-md">
+                        {pageData.count} views
+                      </div>
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${heightPercent}%` }}
+                        transition={{ duration: 0.8, delay: i * 0.1 }}
+                        className="w-full bg-gradient-to-t from-indigo-500 to-indigo-400/50 rounded-t-lg hover:from-pink-500 hover:to-pink-400/50 transition-colors cursor-pointer shadow-lg"
+                      />
+                      <span className="text-[10px] text-slate-400 font-bold break-all text-center leading-tight">
+                        {pageData._id === '/' ? 'Home' : pageData._id.replace('/', '')}
+                      </span>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-slate-500 font-medium">
+                  Not enough data collected yet.
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>
 
-        {/* Top Actions Placeholder */}
+        {/* Action Insights Placeholder */}
         <div className="lg:col-span-4">
-          <div className="glass-card p-8 text-center flex flex-col items-center justify-center h-full">
-             <BarChart3 className="text-pink-400 mb-4" size={48} />
-             <p className="text-lg font-bold">Deep Funnel Analysis</p>
-             <p className="text-sm text-slate-500">Real-time action frequency tracking active.</p>
+          <div className="glass-card p-8 text-center flex flex-col items-center justify-center h-full relative overflow-hidden">
+             <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-pink-500/20 blur-3xl rounded-full"></div>
+             <MousePointer2 className="text-pink-400 mb-6" size={56} />
+             <p className="text-2xl font-black mb-2 text-white">Conversion Events</p>
+             <p className="text-sm text-slate-400 px-4 leading-relaxed font-medium">Events such as job applications, profile views, and button clicks are actively being monitored.</p>
           </div>
         </div>
       </div>
